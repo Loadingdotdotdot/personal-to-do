@@ -45,9 +45,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  Var vars = new Var();
-
-
   showAddDialog(BuildContext context) {
 
     TextEditingController tc = TextEditingController();
@@ -60,10 +57,12 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           //print(tc.text);
           //assignments.add(tc.text);
-          vars.addList(tc.text, dc.text, cc.text, "14567");
+          Var.addList(tc.text, dc.text, cc.text, "14567");
+          Var.assignments.value.add(Task(tc.text, dc.text, cc.text, "12345"));
           //sleep(const Duration(seconds: 1));
-          vars.updateList();
+          //vars.updateList();
         });
+        Navigator.pop(context);
       },
     );
 
@@ -100,29 +99,47 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
+  @override
+  void initState() {
+    super.initState();
+    Var.updateList();
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    vars.updateList();
 
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        leading: IconButton(
+          icon: Icon(
+            Icons.refresh
+          ),
+          onPressed: () {
+            Var.assignments.value.clear();
+            Var.updateList();
+          },
+        ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-            children: Var.assignments.map((e) {
-              bool cb = false;
-              return CheckboxListTile(
-                title: Text(e.name),
-                value: cb,
-                onChanged: (bool value) {
-                  cb = !cb;
-                },
-            );}).toList(),
+        child: ValueListenableBuilder<List<Task>>(
+          valueListenable: Var.assignments,
+          builder: (BuildContext context, List value, Widget child) {
+            return Column(
+              children: Var.assignments.value.map((e) {
+                bool cb = false;
+                return CheckboxListTile(
+                  title: Text(e.name),
+                  value: cb,
+                  onChanged: (bool value) {
+                    cb = !cb;
+                  },
+                );
+              }).toList(),
+            );
+          }
         ),
       ),
       floatingActionButton: FloatingActionButton(
